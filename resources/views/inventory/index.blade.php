@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>RAM-CIMS - Inventory Dashboard</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 </head>
@@ -26,7 +27,7 @@
                 + Add New Item
             </button>
         </div>
-
+        
         <div class="card shadow-sm">
             <div class="card-body p-0">
                 <table class="table table-hover table-striped mb-0 align-middle">
@@ -38,6 +39,7 @@
                             <th>Category</th>
                             <th>Quantity On Hand</th>
                             <th>Expiration Date</th>
+                            <th class="text-center">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -66,17 +68,18 @@
                                     </button>
                                 </td>
                             </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="7" class="text-center py-5 text-muted">No campus clinic supplies recorded yet.</td>
-                                </tr>
+                        @empty
+                            <tr>
+                                <td colspan="7" class="text-center py-5 text-muted">No campus clinic supplies recorded yet.</td>
+                            </tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
-<!--EDIT-->
+
+    <!-- Add Item Modal -->
     <div class="modal fade" id="addItemModal" tabindex="-1" aria-labelledby="addItemModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -87,12 +90,10 @@
                 <form action="/inventory" method="POST">
                     @csrf
                     <div class="modal-body row g-3">
-                        
                         <div class="col-md-6">
                             <label for="ITEM_CODE" class="form-label fw-semibold">Item Code</label>
                             <input type="text" class="form-control" id="ITEM_CODE" name="ITEM_CODE" placeholder="e.g., 1001" required>
                         </div>
-
                         <div class="col-md-6">
                             <label for="ITEM_CATEGORY" class="form-label fw-semibold">Category</label>
                             <select class="form-select" id="ITEM_CATEGORY" name="ITEM_CATEGORY" required>
@@ -103,30 +104,25 @@
                                 <option value="First Aid">First Aid</option>
                             </select>
                         </div>
-
                         <div class="col-12">
                             <label for="GENERIC_NAME" class="form-label fw-semibold">Generic Name</label>
                             <input type="text" class="form-control" id="GENERIC_NAME" name="GENERIC_NAME" placeholder="e.g., Paracetamol" required>
                         </div>
-
                         <div class="col-12">
                             <label for="BRAND_NAME" class="form-label fw-semibold">Brand Name (Optional)</label>
                             <input type="text" class="form-control" id="BRAND_NAME" name="BRAND_NAME" placeholder="e.g., Biogesic">
                         </div>
-
                         <div class="col-md-6">
                             <label for="ITEM_QUANTITY" class="form-label fw-semibold">Initial Quantity</label>
                             <input type="number" class="form-control" id="ITEM_QUANTITY" name="ITEM_QUANTITY" min="0" placeholder="0" required>
                         </div>
-
                         <div class="col-md-6">
                             <label for="ITEM_EXPIRATION_DATE" class="form-label fw-semibold">Expiration Date</label>
                             <input type="date" class="form-control" id="ITEM_EXPIRATION_DATE" name="ITEM_EXPIRATION_DATE" required>
                         </div>
-
                     </div>
                     <div class="modal-footer bg-light">
-                        <button type="button" class="btn btn-secondary" data-bs-toggle="modal">Cancel</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-success fw-semibold">Save to Inventory</button>
                     </div>
                 </form>
@@ -134,48 +130,141 @@
         </div>
     </div>
 
+    <!-- Edit Item Modal (ADDED) -->
+    <div class="modal fade" id="editItemModal" tabindex="-1" aria-labelledby="editItemModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title fw-bold" id="editItemModalLabel">Edit Supply Item</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="editItemForm">
+                    <div class="modal-body row g-3">
+                        <div class="col-md-6">
+                            <label for="edit_ITEM_CODE" class="form-label fw-semibold">Item Code</label>
+                            <input type="text" class="form-control" id="edit_ITEM_CODE" name="ITEM_CODE" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="edit_ITEM_CATEGORY" class="form-label fw-semibold">Category</label>
+                            <select class="form-select" id="edit_ITEM_CATEGORY" name="ITEM_CATEGORY" required>
+                                <option value="Medicine">Medicine</option>
+                                <option value="Medical Supply">Medical Supply</option>
+                                <option value="Equipment">Equipment</option>
+                                <option value="First Aid">First Aid</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label for="edit_GENERIC_NAME" class="form-label fw-semibold">Generic Name</label>
+                            <input type="text" class="form-control" id="edit_GENERIC_NAME" name="GENERIC_NAME" required>
+                        </div>
+                        <div class="col-12">
+                            <label for="edit_BRAND_NAME" class="form-label fw-semibold">Brand Name (Optional)</label>
+                            <input type="text" class="form-control" id="edit_BRAND_NAME" name="BRAND_NAME">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="edit_ITEM_QUANTITY" class="form-label fw-semibold">Quantity</label>
+                            <input type="number" class="form-control" id="edit_ITEM_QUANTITY" name="ITEM_QUANTITY" min="0" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="edit_ITEM_EXPIRATION_DATE" class="form-label fw-semibold">Expiration Date</label>
+                           <input type="date" class="form-control" id="edit_ITEM_EXPIRATION_DATE" name="ITEM_EXPIRATION_DATE" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary fw-semibold">Update Item</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const editModal = document.getElementById('editItemModal');
+
+            if (editModal) {
+                // Bootstrap event triggered right when the edit modal opens
+                editModal.addEventListener('show.bs.modal', function (event) {
+                    const button = event.relatedTarget; // Button that triggered the modal
+                
+                    if (!button) return;
+
+                    // Extract values directly from button attributes
+                    const code = button.getAttribute('data-code') || '';
+                    const generic = button.getAttribute('data-generic') || '';
+                    const brand = button.getAttribute('data-brand') || '';
+                    const category = button.getAttribute('data-category') || '';
+                    const quantity = button.getAttribute('data-quantity') || '0';
+                    const expiration = button.getAttribute('data-expiration') || '';
+
+                    // Populate form input elements
+                    document.getElementById('edit_ITEM_CODE').value = code;
+                    document.getElementById('edit_GENERIC_NAME').value = generic;
+                    document.getElementById('edit_BRAND_NAME').value = brand;
+                    document.getElementById('edit_ITEM_CATEGORY').value = category;
+                    document.getElementById('edit_ITEM_QUANTITY').value = quantity;
+
+                    // Format date for <input type="date"> (YYYY-MM-DD)
+                    if (expiration) {
+                        const cleanDate = expiration.split(' ')[0];
+                        document.getElementById('edit_ITEM_EXPIRATION_DATE').value = cleanDate;
+                    } else {
+                        document.getElementById('edit_ITEM_EXPIRATION_DATE').value = '';
+                    }
+                });
+            }
+
+            // Submit edit form via PUT AJAX request
+            const editForm = document.getElementById('editItemForm');
+            if (editForm) {
+                editForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
+
+                    // Retrieve code directly from input or fallback
+                    const codeInput = document.getElementById('edit_ITEM_CODE');
+                    const code = codeInput ? codeInput.value : '';
+
+                    if (!code) {
+                        alert('Error: Item Code is missing.');
+                        return;
+                    }
+
+                    const formData = new FormData(this);
+                    const data = Object.fromEntries(formData.entries());
+
+                    // Explicit absolute origin URL construction
+                    const targetUrl = `${window.location.origin}/inventory/${encodeURIComponent(code)}`;
+                    fetch(targetUrl, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+                        },
+                        body: JSON.stringify(data)
+                    })
+                    .then(async response => {
+                        const result = await response.json();
+                        if (response.status === 200) {
+                            alert(result.message || 'Item updated successfully!');
+                            location.reload();
+                        } else {
+                            const errorMsg = result.errors 
+                                ? Object.values(result.errors).flat().join('\n') 
+                                : (result.message || 'Failed to update item');
+                            alert('Validation Error:\n' + errorMsg);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('API Error:', error);
+                        alert('Network error or server unreachable.');
+                    });
+                });
+            }
+        });
+</script>
 </body>
 </html>
-
-<script>
-document.querySelectorAll('.edit-btn').forEach(button => {
-    button.addEventListener('click', function() {
-        document.getElementById('edit_ITEM_CODE').value = this.dataset.code;
-        document.getElementById('edit_GENERIC_NAME').value = this.dataset.generic;
-        document.getElementById('edit_BRAND_NAME').value = this.dataset.brand || '';
-        document.getElementById('edit_ITEM_CATEGORY').value = this.dataset.category;
-        document.getElementById('edit_ITEM_QUANTITY').value = this.dataset.quantity;
-        document.getElementById('edit_ITEM_EXPIRATION_DATE').value = this.dataset.expiration;
-    });
-});
-document.getElementById('editItemForm').addEventListener('submit', function (e) {
-    e.preventDefault();
-
-    const code = document.getElementById('edit_ITEM_CODE').value;
-    const formData = new FormData(this);
-    const data = Object.fromEntries(formData.entries());
-
-    fetch(`/api/v1/inventory/${code}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
-        },
-        body: JSON.stringify(data)
-    })
-    .then(async response => {
-        const result = await response.json();
-        if (response.status === 200) {
-            alert('Item updated successfully! (Status: 200 OK)');
-            location.reload();
-        } else {
-            alert('Error: ' + result.message);
-        }
-    })
-    .catch(error => console.error('API Error:', error));
-});
-</script>
-
-<!--fw-semibold text-secondary, ITEM_CODE badge bg-dark font-monospace, ITEM_CATEGORY badge bg-light text-dark border-->
