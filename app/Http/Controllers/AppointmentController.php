@@ -33,7 +33,6 @@ class AppointmentController extends Controller
             ->orderBy('AVAILABLE_DATE', 'asc')
             ->get();
 
-        // Ensure both variables are passed to the view
         return view('appointments.index', compact('appointments', 'schedules'));
     }
 

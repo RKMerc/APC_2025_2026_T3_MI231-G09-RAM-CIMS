@@ -39,7 +39,6 @@ class InventoryController extends Controller
         $item = Inventory::where('ITEM_CODE', $code)->firstOrFail();
 
         $validated = $request->validate([
-            // FIXED: Ignore existing record during unique check
             'ITEM_CODE'            => 'required|integer|unique:inventory,ITEM_CODE,' . $code . ',ITEM_CODE',
             'GENERIC_NAME'         => 'required|string|max:255',
             'BRAND_NAME'           => 'nullable|string|max:255',
