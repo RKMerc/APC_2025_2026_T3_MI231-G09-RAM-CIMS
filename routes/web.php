@@ -6,6 +6,4 @@ use App\Http\Controllers\InventoryController;
 Route::get('/', function () {
     return view('welcome');
 });
-
 Route::get('/inventory', [InventoryController::class, 'index']);
-Route::post('/inventory', [InventoryController::class, 'store']);

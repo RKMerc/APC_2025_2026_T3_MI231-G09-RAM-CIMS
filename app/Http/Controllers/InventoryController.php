@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 
 class InventoryController extends Controller
 {
-    // Display the updated inventory list
     public function index()
     {
         $supplies = Inventory::all();
@@ -17,20 +16,44 @@ class InventoryController extends Controller
     // Handle the submission of a new item form
     public function store(Request $request)
     {
-        // 1. Validate form fields
         $validated = $request->validate([
             'ITEM_CODE'            => 'required|integer|unique:inventory,ITEM_CODE',
             'GENERIC_NAME'         => 'required|string|max:255',
-            'BRAND_NAME'           => 'nullable|string|max:255', // Optional for non-medicine items
+            'BRAND_NAME'           => 'nullable|string|max:255',
             'ITEM_CATEGORY'        => 'required|string',
             'ITEM_QUANTITY'        => 'required|integer|min:0',
             'ITEM_EXPIRATION_DATE' => 'required|date',
         ]);
 
-        // 2. Insert record into MariaDB
-        Inventory::create($validated);
+        $item = Inventory::create($validated);
 
-        // 3. Bounce back to the layout with a success message banner
-        return redirect('/inventory')->with('success', 'New supply item registered successfully!');
+        return response()->json([
+            'status'  => 'Success',
+            'message' => 'Item created successfully',
+            'data'    => $item,
+        ], 201);
+    }
+
+    public function update(Request $request, $code)
+    {
+        $item = Inventory::where('ITEM_CODE', $code)->firstOrFail();
+
+        $validated = $request->validate([
+            // FIXED: Ignore existing record during unique check
+            'ITEM_CODE'            => 'required|integer|unique:inventory,ITEM_CODE,' . $code . ',ITEM_CODE',
+            'GENERIC_NAME'         => 'required|string|max:255',
+            'BRAND_NAME'           => 'nullable|string|max:255',
+            'ITEM_CATEGORY'        => 'required|string',
+            'ITEM_QUANTITY'        => 'required|integer|min:0',
+            'ITEM_EXPIRATION_DATE' => 'required|date',
+        ]);
+
+        $item->update($validated);
+
+        return response()->json([
+            'status'  => 'Success',
+            'message' => 'Item updated successfully',
+            'data'    => $item,
+        ], 200);
     }
 }

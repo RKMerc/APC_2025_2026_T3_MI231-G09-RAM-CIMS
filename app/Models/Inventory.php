@@ -10,8 +10,8 @@ class Inventory extends Model
     protected $primaryKey = 'ITEM_CODE';
     
     // Set to false if ITEM_CODE is a custom string (e.g., "MED-001") rather than an auto-incrementing integer
-    public $incrementing = false; 
-    protected $keyType = 'string';
+    public $incrementing = false; // Change from false to true
+    protected $keyType = 'int';   // Change from 'string' to 'int'
 
     public $timestamps = false; 
 
