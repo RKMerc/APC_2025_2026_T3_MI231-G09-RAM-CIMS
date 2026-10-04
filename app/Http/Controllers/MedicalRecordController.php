@@ -17,7 +17,7 @@ class MedicalRecordController extends Controller
     {
         $request->validate([
             'PATIENT_ID' => 'required|integer',
-            'APPT_ID' => 'required|integer', // Changed from nullable to required
+            'APPT_ID' => 'required|integer',
             'MEDREC_CONSUL_DATE' => 'required|date',
             'MEDREC_DIAGNOSIS' => 'required|string|max:250',
             'MEDREC_MEDICINE_DOSAGE' => 'nullable|string|max:100',
