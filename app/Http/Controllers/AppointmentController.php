@@ -55,12 +55,12 @@ class AppointmentController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'PATIENT_NAME'        => 'required|string|max:255',
+            'PATIENT_ID'          => 'required|integer',
             'APPOINTMENT_TYPE'    => 'required|string|max:255',
             'APPOINTMENT_REASON'  => 'required|string',
             'ATTENDING_PHYSICIAN' => 'required|string|max:255',
             'SCHEDULED_AT'        => 'required|date',
-            'STATUS'              => 'nullable|string'
+            'STATUS'              => 'nullable|string',
         ]);
 
         Appointment::create($validated);
@@ -73,12 +73,12 @@ class AppointmentController extends Controller
         $appointment = Appointment::findOrFail($id);
 
         $validated = $request->validate([
-            'PATIENT_NAME'        => 'required|string|max:255',
+            'PATIENT_ID'          => 'required|integer',
             'APPOINTMENT_TYPE'    => 'required|string|max:255',
             'APPOINTMENT_REASON'  => 'required|string',
             'ATTENDING_PHYSICIAN' => 'required|string|max:255',
             'SCHEDULED_AT'        => 'required|date',
-            'STATUS'              => 'required|string'
+            'STATUS'              => 'required|string',
         ]);
 
         $appointment->update($validated);
