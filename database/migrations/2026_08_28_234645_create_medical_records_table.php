@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('MEDREC_NOTES', 45)->nullable();
             $table->string('MEDREC_MEDICINE_DOSAGE', 100)->nullable();
             $table->unsignedBigInteger('PATIENT_ID');
-            $table->unsignedBigInteger('APPT_ID')->nullable();
+            $table->unsignedBigInteger('APPT_ID');
             $table->timestamps();
         });
     }
